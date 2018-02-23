@@ -27,6 +27,12 @@ marked.setOptions({
 
 export default {
   name: 'MarkdownEditor',
+  props: {
+    isLoggedIn: {
+      type: Boolean,
+      required: true
+    }
+  },
   data () {
     return {
       mdText: '# sample\n'

@@ -1,11 +1,33 @@
 <template lang="pug">
 #app
+  el-dialog(
+    title="ログイン"
+    :visible="!isLoggedIn"
+    width="30%"
+    :close-on-click-modal="false"
+    :close-on-press-escape="false"
+    :show-close="false"
+  )
+    el-form(
+      :model="form"
+      @submit.native.prevent="login"
+    )
+      el-form-item(label="ユーザー名")
+        el-input(v-model="form.username" auto-complete="off")
+    span(slot="footer")
+      el-button(
+        type="primary"
+        :disabled="!isAbleToLogin"
+        @click="login"
+      ) ログイン
   el-container
     el-header
       span.title Markdown Live Share
     el-container
       el-main
-        MarkdownEditor
+        MarkdownEditor(
+          :isLoggedIn="isLoggedIn"
+        )
       el-aside(width="150px")
 </template>
 
@@ -16,6 +38,29 @@ export default {
   name: 'App',
   components: {
     MarkdownEditor
+  },
+  data () {
+    return {
+      username: '',
+      form: {
+        username: ''
+      }
+    }
+  },
+  computed: {
+    isLoggedIn () {
+      return !!this.username
+    },
+    isAbleToLogin () {
+      return !!this.form.username
+    }
+  },
+  methods: {
+    login () {
+      if (this.form.username) {
+        this.username = this.form.username
+      }
+    }
   }
 }
 </script>
