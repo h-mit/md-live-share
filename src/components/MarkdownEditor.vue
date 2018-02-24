@@ -4,6 +4,7 @@
     :value="mdText"
     @input="updateText"
     spellcheck="false"
+    disabled="!isLoggedIn"
   )
   div.preview.markdown-body(
     v-html="previewText"

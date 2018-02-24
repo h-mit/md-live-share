@@ -1,37 +1,24 @@
 <template lang="pug">
 #app
-  el-dialog(
-    title="ログイン"
-    :visible="!isLoggedIn"
-    width="30%"
-    :close-on-click-modal="false"
-    :close-on-press-escape="false"
-    :show-close="false"
-  )
-    el-form(
-      :model="form"
-      @submit.native.prevent="login"
-    )
-      el-form-item(label="ユーザー名")
+  //- ログインダイアログ
+  el-dialog(title="ログイン" :visible="!isLoggedIn" width="30%" :close-on-click-modal="false" :close-on-press-escape="false" :show-close="false")
+    el-form(:model="form" status-icon :rules="rules" ref="form" @submit.native.prevent="login")
+      el-form-item(label="ユーザー名（英数字が使用できます）" prop="username")
         el-input(v-model="form.username" auto-complete="off")
     span(slot="footer")
-      el-button(
-        type="primary"
-        :disabled="!isAbleToLogin"
-        @click="login"
-      ) ログイン
+      el-button(type="primary" :disabled="!isAbleToLogin" @click="login") ログイン
   el-container
-    el-header
-      span.title Markdown Live Share
+    el-header: span.title Markdown Live Share
     el-container
-      el-main
-        MarkdownEditor(
-          :isLoggedIn="isLoggedIn"
-        )
+      //- メインコンテンツ
+      el-main: MarkdownEditor(:isLoggedIn="isLoggedIn")
       el-aside(width="150px")
 </template>
 
 <script>
+import Peer from 'skyway-js'
+import key from './skyway-key'
+import shortid from 'shortid'
 import MarkdownEditor from './components/MarkdownEditor'
 
 export default {
@@ -44,8 +31,29 @@ export default {
       username: '',
       form: {
         username: ''
-      }
+      },
+      rules: {
+        username: [
+          {
+            validator (rule, value, callback) {
+              if (!value) {
+                callback(new Error('ユーザー名を入力してください'))
+              } else if (!/^[A-Za-z0-9]+$/.exec(value)) {
+                callback(new Error('使用できない文字が含まれています'))
+              } else {
+                callback()
+              }
+            },
+            trigger: 'blur'
+          }
+        ]
+      },
+      uuid: '',
+      room: null
     }
+  },
+  created () {
+    this.uuid = shortid.generate()
   },
   computed: {
     isLoggedIn () {
@@ -57,9 +65,48 @@ export default {
   },
   methods: {
     login () {
-      if (this.form.username) {
-        this.username = this.form.username
-      }
+      this.$refs.form.validate(valid => {
+        if (valid) {
+          // バリデーションを通過した場合のみ処理
+          this.username = this.form.username
+          this.setupPeer()
+        }
+      })
+    },
+    // Peerオブジェクトを生成する
+    setupPeer () {
+      const peerId = this.username + ' ' + this.uuid
+      const peer = new Peer(peerId, {
+        key,
+        debug: 3
+      })
+      peer
+        .on('open', id => {
+          console.log(id)
+        })
+        .on('connection', connection => {
+          this.connect(connection)
+        })
+        .on('error', this.handleError)
+    },
+    connect (connection) {
+      console.log(connection)
+    },
+    // メッセージの表示
+    message (message, type = 'info') {
+      this.$message({
+        showClose: true,
+        message,
+        type
+      })
+    },
+    // 警告メッセージの表示
+    warning (message) {
+      this.message(message, 'warning')
+    },
+    // エラーハンドリング
+    handleError (error) {
+      this.message(error.message, 'error')
     }
   }
 }
