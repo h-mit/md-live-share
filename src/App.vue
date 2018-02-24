@@ -30,7 +30,7 @@ export default {
     return {
       username: '',
       form: {
-        username: ''
+        username: 'Mitani'
       },
       rules: {
         username: [
@@ -49,7 +49,8 @@ export default {
         ]
       },
       uuid: '',
-      room: null
+      peer: null,
+      roomName: ''
     }
   },
   created () {
@@ -61,9 +62,22 @@ export default {
     },
     isAbleToLogin () {
       return !!this.form.username
+    },
+    peerId () {
+      return this.username + ' ' + this.uuid
     }
   },
   methods: {
+    parseQuery () {
+      // URLのクエリをパースしてroomNameを取得
+      const pairs = location.search.substring(1).split('&')
+      for (const pair of pairs) {
+        const kv = pair.split('=')
+        if (kv[0] === 'r') {
+          this.roomName = kv[1]
+        }
+      }
+    },
     login () {
       this.$refs.form.validate(valid => {
         if (valid) {
@@ -75,22 +89,53 @@ export default {
     },
     // Peerオブジェクトを生成する
     setupPeer () {
-      const peerId = this.username + ' ' + this.uuid
-      const peer = new Peer(peerId, {
+      this.peer = new Peer(this.peerId, {
         key,
-        debug: 3
+        debug: 2
       })
-      peer
         .on('open', id => {
-          console.log(id)
+          // オープンしたら部屋を作成する
+          this.joinRoom()
         })
         .on('connection', connection => {
           this.connect(connection)
         })
         .on('error', this.handleError)
     },
-    connect (connection) {
-      console.log(connection)
+    // 部屋に参加する
+    joinRoom () {
+      if (!this.roomName) {
+        // 部屋が存在しなければ自分のuuidで部屋を作成する
+        this.roomName = this.uuid
+      }
+      const room = this.peer.joinRoom(this.roomName, { mode: 'sfu' })
+        .on('open', () => {
+          console.log('部屋がオープンしました')
+          this.connect(room)
+        })
+    },
+    // 部屋のイベントハンドラ設定
+    connect (room) {
+      room.getLog()
+      room
+        .once('log', logs => {
+          // 途中から部屋に参加した場合はルームのログを取得して、過去の状態を復元する
+          for (let log of logs) {
+            log = JSON.parse(log)
+            console.log(log)
+            // log.messageTypeは3通りある
+            // ROOM_DATA, ROOM_USER_JOIN, ROOM_USER_LEAVE
+          }
+        })
+        .on('data', data => {
+          console.log('data', data)
+        })
+        .on('peerJoin', peerId => {
+          console.log(`${peerId} が部屋に参加しました`)
+        })
+        .on('peerLeave', peerId => {
+          console.log(`${peerId} が部屋から退室しました`)
+        })
     },
     // メッセージの表示
     message (message, type = 'info') {
