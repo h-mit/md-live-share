@@ -12,7 +12,7 @@
       MyHeader(:room-name="roomName")
     el-container
       //- メインコンテンツ
-      el-main: MarkdownEditor(:isLoggedIn="isLoggedIn")
+      el-main: MarkdownEditor(:text="text" :isLoggedIn="isLoggedIn" @change="onChangeText")
       el-aside(width="150px")
 </template>
 
@@ -53,7 +53,8 @@ export default {
       },
       uuid: '',
       peer: null,
-      roomName: ''
+      roomName: '',
+      text: '# sample\n'
     }
   },
   created () {
@@ -62,7 +63,7 @@ export default {
   },
   computed: {
     isLoggedIn () {
-      return !!this.username
+      return !!this.username && !!this.roomName
     },
     isAbleToLogin () {
       return !!this.form.username
@@ -90,6 +91,12 @@ export default {
           this.setupPeer()
         }
       })
+    },
+    // 自分がテキストを変更したときの処理
+    onChangeText (value) {
+      this.text = value
+      const room = this.peer.rooms[this.roomName]
+      room.send(this.text)
     },
     // Peerオブジェクトを生成する
     setupPeer () {
@@ -132,7 +139,8 @@ export default {
           }
         })
         .on('data', data => {
-          console.log('data', data)
+          // テキストデータを更新
+          this.text = data.data
         })
         .on('peerJoin', peerId => {
           console.log(`${peerId} が部屋に参加しました`)

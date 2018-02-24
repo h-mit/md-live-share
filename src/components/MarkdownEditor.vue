@@ -1,8 +1,8 @@
 <template lang="pug">
 .markdown-editor
   textarea.editor(
-    :value="mdText"
-    @input="updateText"
+    :value="text"
+    @input="inputText"
     spellcheck="false"
     :disabled="!isLoggedIn"
   )
@@ -29,14 +29,26 @@ marked.setOptions({
 export default {
   name: 'MarkdownEditor',
   props: {
+    text: {
+      type: String,
+      required: true
+    },
     isLoggedIn: {
       type: Boolean,
       required: true
     }
   },
+  created () {
+    this.updateText(this.text)
+  },
   data () {
     return {
-      mdText: '# sample\n'
+      mdText: ''
+    }
+  },
+  watch: {
+    text (value) {
+      this.updateText(value)
     }
   },
   computed: {
@@ -45,10 +57,12 @@ export default {
     }
   },
   methods: {
-    updateText: _.debounce(function (e) {
-      console.log(e.target.value)
-      this.mdText = e.target.value
-    }, 300)
+    updateText: _.debounce(function (value) {
+      this.mdText = value
+    }, 300),
+    inputText (e) {
+      this.$emit('change', e.target.value)
+    }
   }
 }
 </script>
