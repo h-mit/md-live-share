@@ -4,7 +4,7 @@
   .link-container(v-if="roomName")
     span.link-label 共有リンク
     el-input(:value="sharedLink" spellcheck="false")
-    el-button.copy(type="primary" :data-clipboard-text="sharedLink") Copy to clipboard
+    el-button.copy(type="success" :data-clipboard-text="sharedLink") Copy to clipboard
 </template>
 
 <script>
@@ -34,7 +34,7 @@ export default {
 <style scoped>
 .my-header {
   display: flex;
-  color: #eee;
+  color: #555;
   line-height: 60px;
 }
 

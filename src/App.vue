@@ -174,7 +174,8 @@ html, body, #app, .el-container {
 }
 
 .el-header {
-  background-color: #3F51B5;
+  background-color: #f8f8f8;
+  border-bottom: 1px solid #eee;
 }
 
 .el-aside {
