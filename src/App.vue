@@ -8,7 +8,8 @@
     span(slot="footer")
       el-button(type="primary" :disabled="!isAbleToLogin" @click="login") ログイン
   el-container
-    el-header: span.title Markdown Live Share
+    el-header
+      MyHeader(:room-name="roomName")
     el-container
       //- メインコンテンツ
       el-main: MarkdownEditor(:isLoggedIn="isLoggedIn")
@@ -19,11 +20,13 @@
 import Peer from 'skyway-js'
 import key from './skyway-key'
 import shortid from 'shortid'
+import MyHeader from './components/MyHeader'
 import MarkdownEditor from './components/MarkdownEditor'
 
 export default {
   name: 'App',
   components: {
+    MyHeader,
     MarkdownEditor
   },
   data () {
@@ -54,6 +57,7 @@ export default {
     }
   },
   created () {
+    this.parseQuery()
     this.uuid = shortid.generate()
   },
   computed: {
@@ -164,14 +168,13 @@ html, body, #app, .el-container {
 }
 
 #app {
+  min-width: 900px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 .el-header {
   background-color: #3F51B5;
-  color: #eee;
-  line-height: 60px;
 }
 
 .el-aside {
@@ -181,12 +184,5 @@ html, body, #app, .el-container {
 
 .el-main {
   padding: 0;
-}
-
-.title {
-  font-family: 'Poiret One', cursive;
-  font-size: 20px;
-  font-weight: bold;
-  letter-spacing: .2em;
 }
 </style>
