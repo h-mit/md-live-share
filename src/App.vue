@@ -176,7 +176,7 @@ html, body, #app, .el-container {
 }
 
 #app {
-  min-width: 900px;
+  min-width: 500px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -194,4 +194,10 @@ html, body, #app, .el-container {
 .el-main {
   padding: 0;
 }
+
+.el-dialog__body {
+  padding-top: 20px;
+  padding-bottom: 10px;
+}
+
 </style>

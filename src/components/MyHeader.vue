@@ -1,10 +1,16 @@
 <template lang="pug">
 .my-header
-  span.title Markdown Live Share
-  .link-container(v-if="roomName")
-    span.link-label 共有リンク
-    el-input(:value="sharedLink" spellcheck="false")
-    el-button.copy(type="success" :data-clipboard-text="sharedLink") Copy to clipboard
+  //- ログインダイアログ
+  el-dialog(title="友達を招待" :visible.sync="dialogVisible" width="30%")
+    span {{ message }}
+    el-form(:inline="true")
+      el-form-item: el-input(:value="sharedLink" auto-complete="off")
+      el-form-item: el-button.copy(type="primary" :data-clipboard-text="sharedLink") Copy
+  //- ヘッダーコンテンツ
+  .header-content
+    span.title Markdown Live Share
+    .link-container(v-if="roomName")
+      el-button(type="primary" @click="openDialog") Invite People
 </template>
 
 <script>
@@ -18,6 +24,12 @@ export default {
       required: true
     }
   },
+  data () {
+    return {
+      dialogVisible: false,
+      message: 'リンクを共有してこの部屋へ招待します。'
+    }
+  },
   mounted () {
     // eslint-disable-next-line no-new
     new Clipboard('.copy')
@@ -27,12 +39,17 @@ export default {
       const href = location.href.split('?')[0]
       return `${href}?r=${this.roomName}`
     }
+  },
+  methods: {
+    openDialog () {
+      this.dialogVisible = true
+    }
   }
 }
 </script>
 
 <style scoped>
-.my-header {
+.header-content {
   display: flex;
   color: #555;
   line-height: 60px;
@@ -48,15 +65,5 @@ export default {
 .link-container {
   flex: 1;
   text-align: right;
-}
-
-.link-label {
-  margin-right: 10px;
-  font-size: 14px;
-}
-
-.el-input {
-  margin-right: 10px;
-  width: 300px;
 }
 </style>
